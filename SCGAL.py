@@ -245,10 +245,10 @@ def sketchy_CGAL(C, A, b, n, d, alpha, A_norm, R, T,
         primal_residual = np.linalg.norm(z - z_old)
         feasibility = np.linalg.norm(z - b)
         if t == check:
-            print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
+            # print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
             check *= 2
         if primal_residual < primal_eps and feasibility < feasible_eps:
-            print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
+            # print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
             break
         z_old = z
     
