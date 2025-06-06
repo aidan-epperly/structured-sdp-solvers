@@ -179,7 +179,9 @@ def nystrom_sketch_recontruct(n, S, Omega):
 
 def sketchy_CGAL(C, A, b, n, d, alpha, A_norm, R, T,
                  enforce_trace=True,
-                 do_log=False, log_data=[], logging_function=None, trace_mode='eq', Omega=None, S=None, z=None, y=None, eig_eps=1e-10):
+                 do_log=False, log_data=[], logging_function=None, trace_mode='eq',
+                 Omega=None, S=None, z=None, y=None,
+                 eig_eps=1e-10, primal_eps=1e-3, feasible_eps=1e-3):
     """
         C: matrix
             Matrix C.
@@ -203,10 +205,14 @@ def sketchy_CGAL(C, A, b, n, d, alpha, A_norm, R, T,
 
     beta0 = 1
 
+    z_old = z
+
     if do_log:
         epoc = time.time()
 
     TRACE = 0
+
+    check = 1
 
     for t in range(1, T+1):
         beta = beta0 * np.sqrt(t + 1)
@@ -230,10 +236,21 @@ def sketchy_CGAL(C, A, b, n, d, alpha, A_norm, R, T,
         # gamma = min( beta0, 16*( temp_alpha**2 )*beta0*( A_norm**2 ) / ( ( (t+1)*(t+2)**(1/2) )*( np.linalg.norm(z - b, ord=2)**2 ) ) ) # This is technicall what they are doing
         y = y + gamma*(z - b)
         S = nystrom_sketch_rank_one_update(v, eta, S, Omega)
+        
         if do_log:
             log_data.append(
                 logging_function(beta, eta, q, v, z, gamma, y, S, Omega, epoc)
             )
+
+        primal_residual = np.linalg.norm(z - z_old)
+        feasibility = np.linalg.norm(z - b)
+        if t == check:
+            print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
+            check *= 2
+        if primal_residual < primal_eps and feasibility < feasible_eps:
+            print(t, "Primal Residual:", primal_residual, "Feasibility:", feasibility)
+            break
+        z_old = z
     
     U, Lambda = nystrom_sketch_recontruct(n, S, Omega)
         
