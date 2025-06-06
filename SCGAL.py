@@ -247,14 +247,16 @@ def sketchy_CGAL(C, A, b, n, d, alpha, A_norm, R, T,
     return U, Lambda, Omega, z, y, S
 
 def run_solver(C, A, b, n, d, alpha, A_norm, R, T,
-                 enforce_trace=True,
-                 enforce_A_norm=True,
-                 enforce_trace_normalization=True,
-                 enforce_C_normalization=True,
-                 normalize_A=(lambda tensor, scalar : [scalar * matrix for matrix in tensor]),
-                 normalize_b=(lambda tensor, scalar : scalar * tensor),
-                 do_log=False, log_data=[], logging_function=None, trace_mode='eq', max_restarts=0, hot_start=False, 
-                 Omega=None, S=None, z=None, y=None, eig_eps=1e-10, iter_eps=1e-2):
+               enforce_trace=True,
+               enforce_A_norm=True,
+               enforce_A_termwise=True,
+               enforce_trace_normalization=True,
+               enforce_C_normalization=True,
+               normalize_A=(lambda tensor, scalar : [scalar * matrix for matrix in tensor]),
+               normalize_b=(lambda tensor, scalar : scalar * tensor),
+               termwise_A_norm=(lambda tensor : [sp.sparse.linalg.norm(matrix) for matrix in tensor]),
+               do_log=False, log_data=[], logging_function=None, trace_mode='eq', max_restarts=0, hot_start=False, 
+               Omega=None, S=None, z=None, y=None, eig_eps=1e-10, iter_eps=1e-2):
     """
         Wrapper function to run the sketchy CGAL solver.
     """
@@ -266,6 +268,12 @@ def run_solver(C, A, b, n, d, alpha, A_norm, R, T,
         A = normalize_A(A, 1/A_norm)
         b = normalize_b(b, 1/A_norm)
         A_norm = 1
+
+    if enforce_A_termwise:
+        termwise_norm = termwise_A_norm(A)
+        for i in range(len(A)):
+            A[i] /= termwise_norm[i]
+            b[i] /= termwise_norm[i]
 
     if enforce_trace_normalization:
         x_scaling_factor *= alpha
