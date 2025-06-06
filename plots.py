@@ -61,8 +61,6 @@ times_lmi = LMI_time_loaded[:, :final_index]
 vals_scgal = SCGAL_obj_loaded[:, :final_index]
 times_scgal = SCGAL_time_loaded[:, :final_index]
 
-print(vals_scgal)
-
 # averaging and relative error
 errors_lp = np.abs(vals_lp - vals_lmi) / np.abs(vals_lmi)
 errors_scgal = np.abs(vals_scgal - vals_lmi) / np.abs(vals_lmi)
@@ -71,7 +69,7 @@ errors_lp = np.mean(errors_lp, axis=0, where=((vals_lp!=0)&(vals_lmi!=0)))
 errors_scgal = np.mean(errors_scgal, axis=0, where=((vals_scgal!=0)&(vals_lmi!=0)))
 
 A = np.array([vals_scgal, vals_lp])
-differences = abs(vals_scgal - vals_lp) / np.max(A, axis=0)
+# differences = abs(vals_scgal - vals_lp) / np.max(A, axis=0)
 
 times_scgal = np.mean(times_scgal, axis=0, where=times_scgal>0)
 times_lp = np.mean(times_lp, axis=0, where=times_lp>0)
